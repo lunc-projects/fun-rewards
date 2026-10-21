@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FUN Staking — Compensation Ledger | Garuda Incident, 21 Oct 2026</title>
+<meta name="description" content="On-chain record of FUN staked in the Garuda cross-staking contract drained on 21 Oct 2026: who is owed what, wallet by wallet.">
+<style>
+:root{--bg:#12100e;--card:#1d1916;--card2:#26201a;--line:#3a2f24;--txt:#f6efe6;--dim:#b8a88f;--gold:#ffb020;--gold2:#ff7847;--ok:#3ddc84;--bad:#ff5d5d}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5}
+a{color:var(--gold)} .wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+header{padding:28px 0 8px} .kicker{color:var(--gold);font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
+h1{font-size:32px;line-height:1.15;margin:6px 0 8px} h1 .grad{background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);max-width:70ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:22px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat .n{font-size:24px;font-weight:800} .stat .l{color:var(--dim);font-size:13px;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}
+.card h2{margin:0 0 10px;font-size:20px}
+input[type=text]{width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font-size:15px;font-family:ui-monospace,Menlo,monospace}
+input[type=text]:focus{outline:2px solid var(--gold);border-color:transparent}
+.result{margin-top:14px;padding:14px;border-radius:10px;background:var(--card2);display:none}
+.result .amt{font-size:28px;font-weight:800;color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.addr{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all}
+.copy{cursor:pointer;background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;font-size:11px;padding:2px 7px;margin-left:6px}
+.bar{height:6px;background:var(--card2);border-radius:3px;margin-top:5px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px}
+.tl{list-style:none;padding:0;margin:0}.tl li{padding:8px 0;border-bottom:1px dashed var(--line)} .tl li:last-child{border-bottom:none}
+.t{font-family:ui-monospace,Menlo,monospace;color:var(--gold);font-size:13px}
+.note{border-left:4px solid var(--gold);padding:10px 14px;background:var(--card2);border-radius:0 10px 10px 0}
+.small{color:var(--dim);font-size:13px} .ok{color:var(--ok);font-weight:700}
+footer{color:var(--dim);font-size:13px;margin-top:30px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all}
+</style>
+</head>
+<body><div class="wrap">
+<header>
+<div class="kicker">Garuda cross-staking incident · 21 October 2026</div>
+<h1>FUN Staking <span class="grad">Compensation Ledger</span></h1>
+<p class="sub">On 21 Oct 2026, Garuda's staking factory was used to drain its FUN cross-staking contract. Everyone who had FUN staked lost their principal. This page is the on-chain record of exactly who is owed what — taken from the contract's own surviving stake records, and reconciled to the last unit against the drain transaction.</p>
+</header>
+
+<div class="stats">
+<div class="stat"><div class="n">2,360.474154 FUN</div><div class="l">Principal owed to stakers</div></div>
+<div class="stat"><div class="n">50</div><div class="l">Wallets with FUN staked</div></div>
+<div class="stat"><div class="n">63.842119 FUN</div><div class="l">FUN rewards-pool balance also taken</div></div>
+<div class="stat"><div class="n">2,424.316273 FUN</div><div class="l">Total swept from the FUN contract</div></div>
+</div>
+
+<div class="card">
+<h2>Check your wallet</h2>
+<p class="small">Paste your Terra Classic wallet address to see what you had staked in the drained FUN pool.</p>
+<input type="text" id="q" placeholder="terra1…" autocomplete="off" spellcheck="false">
+<div class="result" id="res"></div>
+</div>
+
+<div class="card">
+<h2>Full ledger — all 50 wallets</h2>
+<table id="tbl"><thead><tr><th>#</th><th>Wallet</th><th class="num">FUN owed</th><th class="num">Share</th><th>Staked since</th></tr></thead><tbody></tbody></table>
+<p class="small">Wallets whose stake records show a zero balance (fully unstaked before the attack) are not listed — they lost no principal. Accrued but unclaimed cross-rewards are not included; see “How this was verified”.</p>
+</div>
+
+<div class="card">
+<h2>What happened</h2>
+<ul class="tl">
+<li><span class="t">21 Oct 2026, 07:58:54 UTC</span> — An unrelated wallet uploaded a malicious contract code (code 11735). <a href="https://finder.terra.money/classic/tx/15DA5F9EE27E84E39DADA76B53AFDE73518AA2DBA5079C64CDFE956DE8ADC30F" target="_blank" rel="noopener">Store-code tx</a></li>
+<li><span class="t">07:59:06 UTC</span> — The same wallet called <code>migrate_staking</code> on Garuda's staking factory. All 9 staking contracts were migrated to the malicious code and every balance was swept to the attacker's wallet in one transaction. <a href="https://finder.terra.money/classic/tx/E1572248CBAB39B25B7B6D7CC21632CA2714C319F3906983B8BD847515610C25" target="_blank" rel="noopener">Sweep tx</a></li>
+<li><span class="t">08:01:17 UTC</span> — The attacker sold all 2,424.316273 FUN taken from this pool for ~26,880,974 LUNC. <a href="https://finder.terra.money/classic/tx/9B1491FDD31BE341BE1213EAD571BEA77FEC01C14FEEED224FD41E44CFF23E03" target="_blank" rel="noopener">Sale tx</a></li>
+<li>Drained FUN pool contract: <code>terra1n9sfyjsnzjpshn7rq3xxh43p3m0khg65urge4ypflxsdk8d5jx7svz0lu7</code> · Attacker wallet: <code>terra10ytpt4g5j3c0rmg2qlr6nyryqclcff87elszm6</code> (not a Garuda wallet — the factory let a wallet with no Garuda role migrate every staking contract).</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>How this was verified</h2>
+<p>The malicious code has no query functions, but it did not wipe the contract's storage. The contract's raw on-chain state was read after the attack; its stake records (wallet, amount, dates) survived intact.</p>
+<p class="note"><span class="ok">Reconciled exactly:</span> stakers' principal <b>2,360.474154 FUN</b> + FUN rewards pool <b>63.842119 FUN</b> = <b>2,424.316273 FUN</b> — precisely what the sweep transaction took from this contract. Difference: <b>0</b>.</p>
+<p class="small">Not included above: rewards that had accrued but not yet been claimed in the pool's ~36 cross-reward tokens. Those accrue per-staker from shared pools and cannot be split per wallet from balances alone; the surviving contract state holds the pool rates and last-withdraw timestamps needed to compute them.</p>
+</div>
+
+<div class="card">
+<h2>Where FUN staking lives now</h2>
+<p>A replacement FUN staking app — built so an outsider cannot migrate or drain it the way the Garuda factory allowed — is live: <a href="https://lunc-projects.github.io/fun-rewards/" target="_blank" rel="noopener">lunc-projects.github.io/fun-rewards</a>. This ledger is only the record of the old Garuda pool; it does not move funds and is not a claim portal. Any compensation decision and funding rest with the Garuda and FUN teams.</p>
+</div>
+
+<footer>Prepared from live on-chain data (Terra Classic, columbus-5), 21 Oct 2026. Every figure on this page can be checked against the transactions linked above and the drained contract's state. FUN token: <code>terra1le9l8gpwl2f48xluphnwkqrnhwxqt27xhducfzqvncmsh9swavlqjpy7c9</code></footer>
+</div>
+<script>
+const DATA=[{"wallet": "terra12ctxyta3j3jz4pgzc9vzed0y6xgayclq8w2len", "fun": 500.0, "raw": 500000000, "share": 21.1822, "since": "2024-12-12"}, {"wallet": "terra1vm3y8dulmpxr57ctedxnztluuluj0q9qnp2cmu", "fun": 271.0, "raw": 271000000, "share": 11.4807, "since": "2024-12-16"}, {"wallet": "terra13743eudk8ak8h34lllff4gy8ywfcd23w9vlj9v", "fun": 260.1, "raw": 260100000, "share": 11.019, "since": "2026-06-23"}, {"wallet": "terra1zf23yzlxshw53gljj3g0hfrp80rsqehqv5zjhk", "fun": 220.0, "raw": 220000000, "share": 9.3202, "since": "2024-12-07"}, {"wallet": "terra1cms9gav3pvwjl7tufcyt4drql37qm6tmdlmsu6", "fun": 183.0, "raw": 183000000, "share": 7.7527, "since": "2024-11-29"}, {"wallet": "terra1tf5dgqt53ys34hsuwqxelhc8pj7f5h6yazewgj", "fun": 160.255, "raw": 160255000, "share": 6.7891, "since": "2025-01-02"}, {"wallet": "terra1dvphzrwqf4tc5q8cq2jtgwn887sp0k48zxglml", "fun": 127.933118, "raw": 127933118, "share": 5.4198, "since": "2026-01-03"}, {"wallet": "terra19xsjt9y7wj46njqhgnwp2tnyjuqlvvkw6hu4tg", "fun": 101.0, "raw": 101000000, "share": 4.2788, "since": "2024-12-16"}, {"wallet": "terra14t35sq909x2khre3tgq00ay45sfg0n58v6vg8a", "fun": 100.8, "raw": 100800000, "share": 4.2703, "since": "2024-12-12"}, {"wallet": "terra1lcz8crx6rz5mtvgwe0kcn3lq6kqjv2t5z0e88j", "fun": 80.0, "raw": 80000000, "share": 3.3891, "since": "2025-07-26"}, {"wallet": "terra1dw369h8zggmulnwv8nt03vn6fsa5vg6y4a2tny", "fun": 65.699028, "raw": 65699028, "share": 2.7833, "since": "2024-11-30"}, {"wallet": "terra1qkxutd5xmvhlr3gxdfc3h3q743wf9qmvw77rp3", "fun": 54.60359, "raw": 54603590, "share": 2.3132, "since": "2024-11-30"}, {"wallet": "terra14ae669d053k7f7cv0s5wakrz6mayerf0xewnj8", "fun": 51.0, "raw": 51000000, "share": 2.1606, "since": "2024-12-16"}, {"wallet": "terra1lg2a5pesxsk5aaaprpfeg5z9f7qg0pd4wafm2q", "fun": 37.59451, "raw": 37594510, "share": 1.5927, "since": "2024-11-30"}, {"wallet": "terra192ug0uwdzyxq9nnqa0xugesztx5ecqwkqzj72m", "fun": 22.64, "raw": 22640000, "share": 0.9591, "since": "2025-01-28"}, {"wallet": "terra1fnytfnzmuwrp7ughe3tu0uh05mc06ce9sh23aa", "fun": 21.0, "raw": 21000000, "share": 0.8897, "since": "2025-10-09"}, {"wallet": "terra17p0tahtd8x8203lx5utddqx54dj6xlnx2vwf92", "fun": 20.003832, "raw": 20003832, "share": 0.8474, "since": "2026-01-26"}, {"wallet": "terra19spu2gyy973y04pa7r33gwpq2e9w8n4hcty2te", "fun": 13.0, "raw": 13000000, "share": 0.5507, "since": "2025-04-22"}, {"wallet": "terra1fhpqdhw9w7r74mmrc5mj6wm5lk8jcmaaf8l4ag", "fun": 10.0, "raw": 10000000, "share": 0.4236, "since": "2025-11-01"}, {"wallet": "terra1tu0lx26n8vjkpfjrjdyktnvt3wqfdtup65lyj5", "fun": 9.7, "raw": 9700000, "share": 0.4109, "since": "2024-12-13"}, {"wallet": "terra12k97j3jt86aq5cuv7sjkdkt2c03vglp8xwze2s", "fun": 9.0, "raw": 9000000, "share": 0.3813, "since": "2025-01-10"}, {"wallet": "terra196xse3afn29g50fgevfucxfj7hxxe77v686ksp", "fun": 8.0, "raw": 8000000, "share": 0.3389, "since": "2025-01-15"}, {"wallet": "terra10vdc8ykqgxwfn0j0sz33s9lnw755vcp37xksy4", "fun": 8.0, "raw": 8000000, "share": 0.3389, "since": "2025-02-07"}, {"wallet": "terra1eevzw0m6pwgpk69van85p7ywrxc9ftgshatz92", "fun": 4.5, "raw": 4500000, "share": 0.1906, "since": "2025-07-13"}, {"wallet": "terra1lsku7yh0xa7ydzpvasrdd3mxvawg34ksswvdpr", "fun": 4.5, "raw": 4500000, "share": 0.1906, "since": "2025-04-05"}, {"wallet": "terra1exprmurfnwg0fqea7cgsn0tzg6zlprhx7mz44d", "fun": 3.5, "raw": 3500000, "share": 0.1483, "since": "2025-04-03"}, {"wallet": "terra1pqc60ykjue65slh64muvdfeqqcy62xmnvmzkt6", "fun": 2.7, "raw": 2700000, "share": 0.1144, "since": "2025-07-02"}, {"wallet": "terra1c00fgal7ftntug608e27l37n3z2gldp0xfgeuh", "fun": 2.1, "raw": 2100000, "share": 0.089, "since": "2026-08-08"}, {"wallet": "terra1tw9v6ggp74uzvmkgkdhsydeqwgsdapgctfzgw6", "fun": 1.422658, "raw": 1422658, "share": 0.0603, "since": "2025-07-23"}, {"wallet": "terra1w0u8mxpmzc9qhdn55eq5avxgeju2ueknlpr7cd", "fun": 1.0, "raw": 1000000, "share": 0.0424, "since": "2024-12-27"}, {"wallet": "terra1z9me4xhzaz8h5n75p4xtyjf26jfalmeulnxeyk", "fun": 1.0, "raw": 1000000, "share": 0.0424, "since": "2024-12-16"}, {"wallet": "terra1dwt3m9xf6f8asjs6f5gdd2hk6n5qykyffs60h7", "fun": 1.0, "raw": 1000000, "share": 0.0424, "since": "2024-12-16"}, {"wallet": "terra10p7d73wgxythyskhhupw4823qykz6h0uwq7qal", "fun": 1.0, "raw": 1000000, "share": 0.0424, "since": "2024-12-16"}, {"wallet": "terra1mgs6a052kewrezvkc3uyqg05963ecsh95uzztw", "fun": 1.0, "raw": 1000000, "share": 0.0424, "since": "2024-11-29"}, {"wallet": "terra1ju0tzs49nr9c5433dk2v5mj7wn5lesqphvhnke", "fun": 0.8, "raw": 800000, "share": 0.0339, "since": "2024-12-14"}, {"wallet": "terra1n5qj93jw56wsym0yp2kpll2ydlpa5c8a0dvej6", "fun": 0.438, "raw": 438000, "share": 0.0186, "since": "2025-03-27"}, {"wallet": "terra1ertq6s5h52zs7ltn2w745vnjmddzadl8tlsx8z", "fun": 0.4, "raw": 400000, "share": 0.0169, "since": "2025-01-09"}, {"wallet": "terra130ut8s72wdux235a9htp4mejltgzcszthxk78u", "fun": 0.15778, "raw": 157780, "share": 0.0067, "since": "2025-03-07"}, {"wallet": "terra1xzvf5nyyz6zdvcmcxgrtu6lftms74h3qng5kns", "fun": 0.14, "raw": 140000, "share": 0.0059, "since": "2025-10-05"}, {"wallet": "terra10jwx5kv59ytapg2v7t6wgvjpm0smyq3ezywx7j", "fun": 0.1, "raw": 100000, "share": 0.0042, "since": "2024-12-05"}, {"wallet": "terra1w2h4adzmv8thx654dmx49qkycs2gegjuve76q6", "fun": 0.1, "raw": 100000, "share": 0.0042, "since": "2024-11-30"}, {"wallet": "terra1nmy7ak8va66mrzugkc6mkvp6422ywavqvs5pm0", "fun": 0.08, "raw": 80000, "share": 0.0034, "since": "2025-12-04"}, {"wallet": "terra1l37rpchtskljdn80zl7n9gm3kmny7pty84gahc", "fun": 0.064054, "raw": 64054, "share": 0.0027, "since": "2026-01-12"}, {"wallet": "terra1ujymwq9aempu6qtdxvan40c2fk5e0w8yhj4ue6", "fun": 0.057182, "raw": 57182, "share": 0.0024, "since": "2025-02-12"}, {"wallet": "terra1dgn5uc2zg0f6a42hyv6xuakyc6r5krxljnuwn9", "fun": 0.045005, "raw": 45005, "share": 0.0019, "since": "2025-09-16"}, {"wallet": "terra1egranssfznmvnffgcf0wkc3qg83t4vf7a4apvz", "fun": 0.02911, "raw": 29110, "share": 0.0012, "since": "2025-01-07"}, {"wallet": "terra154ns0jnajcjvc4wjjrza020gaux2lzd7rwaf45", "fun": 0.0097, "raw": 9700, "share": 0.0004, "since": "2025-01-27"}, {"wallet": "terra103n0qsl4mfvaea2kg7xqvx02wy4m7kcvvsw9va", "fun": 0.00112, "raw": 1120, "share": 0.0, "since": "2024-12-06"}, {"wallet": "terra1pygza6u2x33nqmtn7szrdnzkds7hhuh343fpwv", "fun": 0.000267, "raw": 267, "share": 0.0, "since": "2025-02-12"}, {"wallet": "terra1522kl0zvas2ny0rxqp44m32hhcqzhzyzqms3nw", "fun": 0.0002, "raw": 200, "share": 0.0, "since": "2025-01-21"}];
+const fmt=n=>n.toLocaleString('en-US',{minimumFractionDigits:6,maximumFractionDigits:6});
+const short=a=>a.slice(0,10)+'…'+a.slice(-6);
+const tbody=document.querySelector('#tbl tbody');
+DATA.forEach((r,i)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${i+1}</td><td><span class="addr">${short(r.wallet)}</span><button class="copy" data-a="${r.wallet}">copy</button><div class="bar"><i style="width:${Math.max(r.share,0.6)}%"></i></div></td><td class="num"><b>${fmt(r.fun)}</b></td><td class="num">${r.share.toFixed(2)}%</td><td>${r.since}</td>`;
+  tbody.appendChild(tr);
+});
+document.addEventListener('click',e=>{ if(e.target.classList.contains('copy')){ navigator.clipboard.writeText(e.target.dataset.a); e.target.textContent='copied'; setTimeout(()=>e.target.textContent='copy',1200);} });
+const q=document.getElementById('q'), res=document.getElementById('res');
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toLowerCase();
+  if(!v){res.style.display='none';return;}
+  const i=DATA.findIndex(r=>r.wallet===v);
+  res.style.display='block';
+  if(i>=0){ const r=DATA[i];
+    res.innerHTML=`<div class="amt">${fmt(r.fun)} FUN</div><div>Rank #${i+1} of 50 · ${r.share.toFixed(2)}% of all staked principal · staked since ${r.since}</div><div class="small" style="margin-top:6px">This is the principal this wallet had staked in the drained Garuda FUN pool at the moment of the attack, per the contract's own records.</div>`;
+  } else {
+    res.innerHTML=`<div><b>No stake found for that address.</b></div><div class="small">Either the address is mistyped, or this wallet had no FUN staked in the Garuda FUN pool (or had already fully unstaked before 21 Oct 2026).</div>`;
+  }
+});
+</script>
+</body></html>
